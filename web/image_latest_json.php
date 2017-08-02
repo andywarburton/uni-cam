@@ -14,19 +14,15 @@ foreach ($files as $key => $value) {
     $files[$key] = str_replace('./pics/', '', $value);
 }
 
-$old_files = $files;
+$clone = $files;
 unset($files);
-
-$files[0] = $old_files[0];
-
-print_r($files)
-
-
+$files[0] = $clone[0];
+unset($clone);
 
 # change content type to json
-#header('Content-Type: application/json');
+header('Content-Type: application/json');
 
 # dump out files as json
-#echo json_encode($files);
+echo json_encode($files);
 
 ?>

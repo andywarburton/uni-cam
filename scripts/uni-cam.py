@@ -31,9 +31,10 @@ button_pin = 2
 
 twitter = Twython(consumer_key, consumer_secret, access_token, access_token_secret)
 
-TEXT = "GET READY!!! .... 3 .... 2 .... 1 .... SAY CHEESE!!!"
-#TEXT = "SMILE!!!"
+#TEXT = "GET READY!!! .... 3 .... 2 .... 1 .... SAY CHEESE!!!"
+TEXT = "SMILE!!!"
 FONT = ("/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf", 20)
+
 
 def take_photo():
 
@@ -53,6 +54,7 @@ def take_photo():
 
     timestamp = str(time.time())
     image_path = "/home/pi/uni-cam/web/pics/" + timestamp + ".jpg"
+    thumb_path = image_path.replace("/pics/", "/thumbs/")
     camera = picamera.PiCamera()
     camera.resolution = (2048, 1456)
     camera.capture(image_path)
@@ -61,12 +63,19 @@ def take_photo():
 
     unicornhathd.off()
 
+    print("starting tweet")
     photo = open(image_path, 'rb')
     image = twitter.upload_media(media=photo)
     message = "Tweeted with Unicam at Amsterjam!"
     twitter.update_status(status=message, media_ids=[image['media_id']])
-
     print("tweet complete")
+
+    print("generating thumbnail")
+    im = Image.open(image_path)
+    im.thumbnail((400, 400), Image.ANTIALIAS)
+    im.save(thumb_path, "JPEG")
+    print("thumbnail done")
+
 
 def draw_text(FONT, TEXT):
 

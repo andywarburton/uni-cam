@@ -1,0 +1,12 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  background: #000;
+}
+
+#wrapper img {
+  width: 25%;
+  float: left;
+  padding: 2px;
+  box-sizing: border-box;
+}
