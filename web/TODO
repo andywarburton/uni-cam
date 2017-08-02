@@ -1,0 +1,10 @@
+all_images.php  GET ARRAY OF ALL IMAGES - GENERATE JSON OUTPUT AS CONTENT TYPE JSON
+last_image.php  GET ARRAY OF LAST IMAGE - GENERATE JSON OUTPUT AS CONTENT TYPE JSON
+index.php - jquery,
+  load all images, add to "loaded images" array
+  render as gallery, with client-side pagination
+  every 5 seconds, load latest image. If not in "loaded images" array add to array and add to start of grid
+  allow images to be clicked on to enlarge in a lightbox
+  email option in lightbox
+  generate on screen keyboard with JS
+email.php - send image to recipient

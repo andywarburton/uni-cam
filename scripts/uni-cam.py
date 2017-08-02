@@ -52,7 +52,7 @@ def take_photo():
     unicornhathd.show()
 
     timestamp = str(time.time())
-    image_path = "/home/pi/web/pics/" + timestamp + ".jpg"
+    image_path = "/home/pi/uni-cam/web/pics/" + timestamp + ".jpg"
     camera = picamera.PiCamera()
     camera.resolution = (2048, 1456)
     camera.capture(image_path)
