@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import colorsys
-import signal
+from signal import pause
 import time
 from sys import exit
 import sys
@@ -9,6 +9,9 @@ import os
 from twython import Twython
 import picamera
 from gpiozero import Button
+
+# define camera
+camera = picamera.PiCamera()
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -26,76 +29,61 @@ consumer_key = 'NObwoqPLvyLxGEiKZtNmwPeDn'
 consumer_secret = 'u7vDB7szLODhX30Y2wn94vPdo1W775xKudSL7LrUctcyL2md87'
 access_token = '886150536550129664-jdrKTgRrCizUnmEGFIuV9Dm0U4TLYuI'
 access_token_secret = 'ZnbQt7hnGVgLicBKgQWUZFE8AlkuVi5AFPUqB9R87IWIf'
-
-button_pin = 2
-
 twitter = Twython(consumer_key, consumer_secret, access_token, access_token_secret)
 
-#TEXT = "GET READY!!! .... 3 .... 2 .... 1 .... SAY CHEESE!!!"
-TEXT = "SMILE!!!"
 FONT = ("/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf", 20)
 
+button_pin = 21
 
 def take_photo():
 
-    white_flash(.1,.1)
-    white_flash(.1,.1)
-    white_flash(.1,.1)
-    white_flash(.1,.1)
+    draw_text(FONT, "GET READY!!! .... 3 .... 2 .... 1 .... SAY CHEESE!!!")
 
-    print("starting to take photo")
-
-    # turn on all the pixels
-    for x in xrange(0, 16):
-        for y in xrange(0, 16):
-                unicornhathd.set_pixel(x, y, 255, 255, 255)
-
-    unicornhathd.show()
+    white_flash(.1,.1)
+    white_flash(.1,.1)
+    white_flash(.1,.1)
+    white_flash(.1,.1)
+    bright_white()
 
     timestamp = str(time.time())
     image_path = "/home/pi/uni-cam/web/pics/" + timestamp + ".jpg"
-    thumb_path = image_path.replace("/pics/", "/thumbs/")
-    camera = picamera.PiCamera()
-    camera.resolution = (2048, 1456)
-    camera.capture(image_path)
 
-    print("photo acquired")
+    camera.resolution = (1024, 728)
+    camera.capture(image_path)
 
     unicornhathd.off()
 
-    print("starting tweet")
+    draw_text(FONT, "PHOTO TAKEN - SENDING TO TWITTER!")
+
+    make_thumb(image_path)
+    send_tweet(image_path)
+
+    draw_text(FONT, "DONE! FOLLOW @AMSTERJAM__ TO SEE YOUR PHOTO!")
+
+
+def make_thumb(image_path):
+    thumb_path = image_path.replace("/pics/", "/thumbs/")
+    im = Image.open(image_path)
+    im.thumbnail((400, 400), Image.ANTIALIAS)
+    im.save(thumb_path, "JPEG")
+
+def send_tweet(image_path):
     photo = open(image_path, 'rb')
     image = twitter.upload_media(media=photo)
     message = "Tweeted with Unicam at Amsterjam!"
     twitter.update_status(status=message, media_ids=[image['media_id']])
-    print("tweet complete")
 
-    print("generating thumbnail")
-    im = Image.open(image_path)
-    im.thumbnail((400, 400), Image.ANTIALIAS)
-    im.save(thumb_path, "JPEG")
-    print("thumbnail done")
-
-
+# fancy pants function to draw scrolling rainbow text
 def draw_text(FONT, TEXT):
 
-    print("drawing text")
-
     unicornhathd.brightness(0.6)
-
     text_x = 0
     text_y = -6
-
     width, height = unicornhathd.get_shape()
-
     font_file, font_size = FONT
-
     font = ImageFont.truetype(font_file, font_size)
-
     text_width, text_height = font.getsize(TEXT)
-
     text_width += width + text_x
-
     image = Image.new("RGB", (text_width,max(16, text_height)), (0,0,0))
     draw = ImageDraw.Draw(image)
 
@@ -118,11 +106,15 @@ def draw_text(FONT, TEXT):
         time.sleep(0.01)
 
 
-    print("drawing text done")
+def bright_white():
+    # turn on all the pixels
+    for x in xrange(0, 16):
+        for y in xrange(0, 16):
+            unicornhathd.set_pixel(x, y, 255, 255, 255)
+
+    unicornhathd.show()
 
 def white_flash(on,off):
-
-    print("flash on")
 
     for x in xrange(0, 16):
         for y in xrange(0, 16):
@@ -134,19 +126,7 @@ def white_flash(on,off):
     unicornhathd.off()
     time.sleep(off)
 
-    print("drawing off")
 
-
-def uni_cam():
-
-    draw_text(FONT, TEXT)
-
-    take_photo()
-
-
-#button = Button(button_pin)
-#button.when_pressed = uni_cam
-
-uni_cam()
-
-unicornhathd.off()
+button = Button(21)
+button.when_pressed = take_photo
+pause()
