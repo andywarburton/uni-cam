@@ -9,6 +9,7 @@ import os
 from twython import Twython
 import picamera
 from gpiozero import Button
+import threading
 
 # define camera
 camera = picamera.PiCamera()
@@ -25,19 +26,17 @@ unicornhathd.rotation(45)
 
 # SETUP
 # Twitter API Keys
-consumer_key = 'NObwoqPLvyLxGEiKZtNmwPeDn'
-consumer_secret = 'u7vDB7szLODhX30Y2wn94vPdo1W775xKudSL7LrUctcyL2md87'
-access_token = '886150536550129664-jdrKTgRrCizUnmEGFIuV9Dm0U4TLYuI'
-access_token_secret = 'ZnbQt7hnGVgLicBKgQWUZFE8AlkuVi5AFPUqB9R87IWIf'
+consumer_key = 'XWjV3kaJc6BKr5iqA4qnqmXtA'
+consumer_secret = 'uxVvUssLWqNvaOZWLQLvIpJTFIZSjCVcm1B1nX0ZLWLAyTFhrS'
+access_token = '1632411-UvUzrPTqLIPBcCw8EwRAatwwVGVb7XH6Gyf5fmfqgn'
+access_token_secret = 'ewKIuNMv5dozZP3hYOnc0NVdsFbI0tH8DKhXtPjHp0U40'
 twitter = Twython(consumer_key, consumer_secret, access_token, access_token_secret)
 
 FONT = ("/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf", 20)
 
-button_pin = 21
-
 def take_photo():
 
-    draw_text(FONT, "GET READY!!! .... 3 .... 2 .... 1 .... SAY CHEESE!!!")
+    draw_text(FONT, "...SAY CHEESE!!!.... 3 .... 2 .... 1")
 
     white_flash(.1,.1)
     white_flash(.1,.1)
@@ -48,17 +47,21 @@ def take_photo():
     timestamp = str(time.time())
     image_path = "/home/pi/uni-cam/web/pics/" + timestamp + ".jpg"
 
+    camera.rotation = 270
     camera.resolution = (1024, 728)
     camera.capture(image_path)
 
     unicornhathd.off()
 
-    draw_text(FONT, "PHOTO TAKEN - SENDING TO TWITTER!")
+    # make thumbnail in the background
+    thumb_thread = threading.Thread(target=make_thumb, args=(image_path,))
+    thumb_thread.start()
 
-    make_thumb(image_path)
-    send_tweet(image_path)
+    # send to twitter in the background
+    twitter_thread = threading.Thread(target=send_tweet, args=(image_path,))
+    twitter_thread.start()
 
-    draw_text(FONT, "DONE! FOLLOW @AMSTERJAM__ TO SEE YOUR PHOTO!")
+    draw_text(FONT, "DONE!")
 
 
 def make_thumb(image_path):
@@ -126,6 +129,8 @@ def white_flash(on,off):
     unicornhathd.off()
     time.sleep(off)
 
+unicornhathd.off()
+take_photo()
 
 button = Button(21)
 button.when_pressed = take_photo
