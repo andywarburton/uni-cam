@@ -1,0 +1,4 @@
+web/pics/*.jpg
+web/thumbs/*.jpg
+scripts/unicamconfig.py
+scripts/unicamconfig.pyc

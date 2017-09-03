@@ -10,6 +10,7 @@ from twython import Twython
 import picamera
 from gpiozero import Button
 import threading
+import unicamconfig as cfg
 
 # define camera
 camera = picamera.PiCamera()
@@ -23,16 +24,18 @@ import unicornhathd
 
 unicornhathd.rotation(45)
 
+def include(filename):
+    if os.path.exists(filename):
+        execfile(filename)
 
 # SETUP
 # Twitter API Keys
-consumer_key = 'XWjV3kaJc6BKr5iqA4qnqmXtA'
-consumer_secret = 'uxVvUssLWqNvaOZWLQLvIpJTFIZSjCVcm1B1nX0ZLWLAyTFhrS'
-access_token = '1632411-UvUzrPTqLIPBcCw8EwRAatwwVGVb7XH6Gyf5fmfqgn'
-access_token_secret = 'ewKIuNMv5dozZP3hYOnc0NVdsFbI0tH8DKhXtPjHp0U40'
-twitter = Twython(consumer_key, consumer_secret, access_token, access_token_secret)
+include('/home/pi/uni-cam-config.py')
+twitter = Twython(cfg.twitter['consumer_key'], cfg.twitter['consumer_secret'], cfg.twitter['access_token'], cfg.twitter['access_token_secret'])
 
 FONT = ("/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf", 20)
+
+
 
 def take_photo():
 
